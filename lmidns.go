@@ -1,4 +1,4 @@
-//    This file is part of lmidns.
+//    This file is part of "Let Me In" for P4wnP1.
 //
 //    Copyright (c) 2018, Marcus Mengs.
 //
