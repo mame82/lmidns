@@ -41,7 +41,7 @@ So we could resolve the same hostname to two different IP addresses, which allow
 Usually the first IP delivers a JS payload, which tries to constantly access the same hostname via JS (respecting the SOP). As soon as the hostname resolves to the former arbitrary IP (after timeout), the JS ends up accessing a potential target (still with respect to the SOP). 
 
 ## Install
-`go get github.com/mame82/LetMeIn`
+`go get github.com/mame82/lmidns`
 
 `lmidns -domain your.rebind.domain`
 

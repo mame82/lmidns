@@ -1,4 +1,4 @@
-//    This file is part of LeMeIn.
+//    This file is part of lmidns.
 //
 //    Copyright (c) 2018, Marcus Mengs.
 //
