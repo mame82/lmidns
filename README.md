@@ -4,7 +4,7 @@
 `lmidns -domain my-rebind-domain.com`
 
 ## Query example (nslookup as resolver):
-### 1) Creating a DNS request, which resolves to an arbitrary IPv4 address:                    *
+### 1) Creating a DNS request, which resolves to an arbitrary IPv4 address:
 `nslookup 192-168-2-1.my-rebind-domain.com`
 
 The host part of the request will be parsed by the DNS server and handed back as IP in the response
@@ -22,14 +22,12 @@ In order to pin another IP, let's say `3.2.4.5` for a given amount of seconds, t
 Pin the IP 3.2.4.5 to lookups aiming for IP 192.168.2.1 for 10 seconds
 
 * Request 1: `nslookup 192-168-2-1-to-3-2-4-5-for-10.my-rebind-domain.com`
-* Response 1: `3.2.4.5` (this response doesn't help, as the domain conflicts with SOP)
+* Response 1: `3.2.4.5` (we don't use this response)
 
-Issue a lookup which should return 192.168.2.1 (if no other IP is pinned)
+Again, issue a lookup which should normally return 192.168.2.1 (if no IP is pinned)
 
 * Request 2: `nslookup 192-168-2-1.my-rebind-domain.com`
-* Response 2: `3.2.4.5` (lookups resolve to 3.2.4.5 for 10 seconds) forwarder themselves.
-
-
+* Response 2: `3.2.4.5` (lookups resolve to 3.2.4.5 for 10 seconds)
 
 ... wait 10 seconds and repeat the lookup ...
 
@@ -38,7 +36,8 @@ Issue a lookup which should return 192.168.2.1 (if no other IP is pinned)
 
 So we could resolve the same hostname to two different IP addresses, which allows to bypass SOP in DNS rebinding based attacks.
 
-Usually the first IP delivers a JS payload, which tries to constantly access the same hostname via JS (respecting the SOP). As soon as the hostname resolves to the former arbitrary IP (after timeout), the JS ends up accessing a potential target (still with respect to the SOP). 
+Usually the first IP delivers a JS payload via HTTP, which tries to constantly access the same hostname via (f.e. via XHR respecting the SOP).
+As soon as the timeout is reached, the hostname resolves to the former arbitrary IP. The (still running) JS ends up accessing the potential target (still with respect to the SOP, as we haven't changed the hostname we're targeting). 
 
 ## Install
 `go get github.com/mame82/lmidns`
@@ -59,13 +58,13 @@ lmins.evil.com.		0       IN	A	2.4.3.5
 lmi.evil.com.		3600	IN	NS	lmins.evil.com.         
 ```
 
-With this zone configuration the NS for lmins.evil.com is on 2.4.3.5 and we can run lmidns on this server with:
+With this zone configuration the NS for lmi.evil.com is searched at 2.4.3.5 and we can start lmidns on this server with:
 
 `lmidns -domain lmins.evil.com`  
 
 ## Additional notes
 
-As most of the DNS rebind attacks are targeting with SoHo networks, keep in mind that some routers block DNS replies belonging to their own subnets, in case they're providing a DNS semselves.
+As most of the DNS rebind attacks are targeting with SoHo networks, keep in mind that some routers block DNS replies belonging to their own subnets, in case they're providing a DNS forwarder themselves.
 
 F.e. AVM FRITZ!Box provides a subnet like `192.168.7.0/24` for LAN clients and the gateway provides an DNS forwarder on `192.168.178.1:53`. Now if one of the clients of this subnet tries to resolve `192-168-178-1.lmi.evil.com`, the response (which would be `192.168.172.1`) will blocked by the FRITZ!Box DNS forwarder (which is a nice DNS rebinding mitigation btw.). This could only be bypassed, in case the client uses a hardcoded external nameserver (ignoring the one offered by DHCP server).
 
